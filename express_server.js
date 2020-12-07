@@ -17,10 +17,13 @@ app.get("/urls", (req, res) => {
   };
   res.render('urls_index', templateVars);
 });
+app.get("/urls/new", (req, res) => {
+  res.render('urls_new');
+});
 
 app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and available in req.param
-  console.log("req.params", req.params); //{ shortURL: 'b2xVn2' }
-  console.log("req.params.shortURL", req.params.shortURL); //{ shortURL: 'b2xVn2' }
+  //console.log("req.params", req.params); //{ shortURL: 'b2xVn2' }
+  //console.log("req.params.shortURL", req.params.shortURL); //{ shortURL: 'b2xVn2' }
   const templateVars = {
     shortURL : req.params.shortURL , //b2xVn2
     longURL : urlDatabase[req.params.shortURL] //http://www.lighthouselabs.ca
