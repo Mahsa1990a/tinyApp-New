@@ -54,6 +54,10 @@ app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and
   };
   res.render('urls_show', templateVars)
 });
+app.get("/u/:shortURL", (req, res) => { //ex: http://localhost:8080/u/b2xVn2 redirect it to : http://www.lighthouselabs.ca
+  const longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+});
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
