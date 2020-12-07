@@ -11,14 +11,15 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 function generateRandomString() { //random id
-  return Math.random().toString(36).substring(2, 8);
+  let id = Math.random().toString(36).substring(2, 8);
+  return id;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 app.get("/", (req, res) => {
   res.send("Hello");
 }); 
-//////////   GET & POST "/urls"
+////////// 
 
 app.get("/urls", (req, res) => {
   const templateVars = {
@@ -31,9 +32,17 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   res.render('urls_new');
 });
+
 app.post("/urls", (req, res) => {
-  console.log("req.body", req.body); //{ longURL: 'www.facebook.com' }
-  res.send("OK");
+  //console.log(urlDatabase); I can see because it is a global
+  //console.log("req.body", req.body); //{ longURL: 'www.facebook.com' }
+  let shortURL = generateRandomString();
+  let longURL = req.body.longURL;
+  console.log("longURL", longURL);
+  console.log("shortURL", shortURL);
+  urlDatabase[shortURL] = longURL; //creating longURL through shortURL(like push)
+ 
+  res.redirect(`/urls/${shortURL}`);
 });
 
 app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and available in req.param
