@@ -10,6 +10,9 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+function generateRandomString() { //random id
+  return Math.random().toString(36).substring(2, 8);
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 app.get("/", (req, res) => {
