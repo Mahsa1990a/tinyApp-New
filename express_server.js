@@ -10,18 +10,27 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+///////////////////////////////////////////////////////////////////////////////////////////////
 
 app.get("/", (req, res) => {
   res.send("Hello");
 }); 
+//////////   GET & POST "/urls"
+
 app.get("/urls", (req, res) => {
   const templateVars = {
     urls: urlDatabase
   };
   res.render('urls_index', templateVars);
 });
+
+//////////
 app.get("/urls/new", (req, res) => {
   res.render('urls_new');
+});
+app.post("/urls", (req, res) => {
+  console.log("req.body", req.body); //{ longURL: 'www.facebook.com' }
+  res.send("OK");
 });
 
 app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and available in req.param
