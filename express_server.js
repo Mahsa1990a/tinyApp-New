@@ -50,7 +50,7 @@ app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and
 app.post('/login', (req, res) => {
   console.log("login req.body.username", req.body.username);
   res.cookie('username', req.body.username);
-  console.log('from post login', req.cookies["username"]);
+  console.log('from post login', req.body.username); //req.cookies["username"]
   res.redirect('/urls');
 });
 
