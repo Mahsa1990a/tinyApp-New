@@ -33,7 +33,7 @@ app.get("/urls/new", (req, res) => {
   res.render('urls_new');
 });
 
-app.post("/urls", (req, res) => {
+app.post("/urls", (req, res) => { //urls/new
   //console.log(urlDatabase); I can see because it is a global
   //console.log("req.body", req.body); //{ longURL: 'www.facebook.com' }
   let shortURL = generateRandomString();
@@ -54,6 +54,13 @@ app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and
   };
   res.render('urls_show', templateVars)
 });
+
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const shortURL = req.params.shortURL; //delet this would be enough because it's a key
+  delete urlDatabase[shortURL];
+  res.redirect("/urls");
+});
+
 app.get("/u/:shortURL", (req, res) => { //ex: http://localhost:8080/u/b2xVn2 redirect it to : http://www.lighthouselabs.ca
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
@@ -65,9 +72,9 @@ app.get("/urls.json", (req, res) => {
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World!</b></body></html>\n")
 });
-app.get("*", (req, res) => {
-  res.statusCode(404).render("404");
-});
+// app.get("*", (req, res) => {
+//   res.statusCode(404).render("404");
+// });
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
