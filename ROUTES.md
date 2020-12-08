@@ -4,6 +4,7 @@
 - 3. GET "/urls/new" : render to urls-new(creat TinyURL, Enter a URL)
 - 4. GET "/urls/:shortURL" : render to 'urls_show' (TinyURL for: longURL, short URL: shortURL, New URL: submit)
 - 4-1. POST "/login" : set cookie name "username" to the value submit with form on browser and redirect to "/urls"
+- 4-2. POST '/logout' : delete username and redirect to '/urls'
 - 5. POST "/urls" : when we go to urls/new => we Enter a NEW URL and submit, it gives info(URL) and redirect it to "`/urls/${shortURL}`"
 
 - 6. POST(delete) "/urls/:shortURL/delete" :
