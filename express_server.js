@@ -38,6 +38,15 @@ app.get("/urls/new", (req, res) => {
   res.render('urls_new');
 });
 
+//3.1 register
+app.get("/register", (req, res) => {
+  const templateVars = {
+    username: req.cookies["username"],
+    urls: urlDatabase
+  };
+  res.render("urls_register", templateVars)
+});
+
 //4.
 app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and available in req.param
   //console.log("req.params", req.params); //{ shortURL: 'b2xVn2' }
