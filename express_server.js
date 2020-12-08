@@ -24,6 +24,7 @@ app.get("/", (req, res) => {
 
 //2.
 app.get("/urls", (req, res) => {
+  console.log('from get urls', req.cookies["username"]);
   const templateVars = {
     username: req.cookies["username"],
     urls: urlDatabase
@@ -33,6 +34,7 @@ app.get("/urls", (req, res) => {
 
 //3.
 app.get("/urls/new", (req, res) => {
+  
   res.render('urls_new');
 });
 
@@ -52,7 +54,7 @@ app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and
 app.post('/login', (req, res) => {
   console.log("login req.body.username", req.body.username);
   res.cookie('username', req.body.username);
-  console.log('from post login', req.cookies["username"]); //
+  //console.log('from post login', req.cookies["username"]); //doesnt show because async
   res.redirect('/urls');
 });
 
