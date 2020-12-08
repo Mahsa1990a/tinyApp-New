@@ -15,6 +15,18 @@ const urlDatabase = {
 function generateRandomString() { //random id
   let id = Math.random().toString(36).substring(2, 8);
   return id;
+};
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // 1.
