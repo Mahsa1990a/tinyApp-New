@@ -56,9 +56,10 @@ app.post('/login', (req, res) => {
   res.redirect('/urls');
 });
 
-//4.2
+//4.2 delete username
 app.post('/logout', (req, res) => {
   res.clearCookie("username", req.body.username);
+  // or res.clearCookie("username") only the key
   res.redirect('/urls');
 });
 
