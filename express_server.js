@@ -25,6 +25,7 @@ app.get("/", (req, res) => {
 //2.
 app.get("/urls", (req, res) => {
   const templateVars = {
+    username: req.cookies["username"],
     urls: urlDatabase
   };
   res.render('urls_index', templateVars);
@@ -40,6 +41,7 @@ app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and
   //console.log("req.params", req.params); //{ shortURL: 'b2xVn2' }
   //console.log("req.params.shortURL", req.params.shortURL); //{ shortURL: 'b2xVn2' }
   const templateVars = {
+    username: req.cookies["username"],
     shortURL : req.params.shortURL , //b2xVn2
     longURL : urlDatabase[req.params.shortURL] //http://www.lighthouselabs.ca
   };
@@ -50,7 +52,7 @@ app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and
 app.post('/login', (req, res) => {
   console.log("login req.body.username", req.body.username);
   res.cookie('username', req.body.username);
-  console.log('from post login', req.body.username); //req.cookies["username"]
+  console.log('from post login', req.cookies["username"]); //
   res.redirect('/urls');
 });
 
