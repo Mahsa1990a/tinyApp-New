@@ -1,11 +1,10 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
-
 const cookieParser = require('cookie-parser');
-app.use(cookieParser())
 
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
 const PORT = 8080;
 app.set("view engine", "ejs");
 
@@ -47,10 +46,14 @@ app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and
   res.render('urls_show', templateVars)
 });
 
-// app.post("/login", (req, res) => {
-//   res.cookie = 
-//   res.redirect("/urls");
-// });
+//4.1
+app.post('/login', (req, res) => {
+  console.log("login req.body.username", req.body.username);
+  res.cookie('username', req.body.username);
+  console.log('from post login', req.cookies["username"]);
+  res.redirect('/urls');
+});
+
 //5.
 app.post("/urls", (req, res) => { //urls/new
   //console.log(urlDatabase); I can see because it is a global
