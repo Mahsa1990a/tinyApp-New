@@ -2,6 +2,7 @@
 - 1. GET "/" : show home page ("Hello")
 - 2. GET "/urls" : define my templateVar with key of urls, of urlDatabase, which render to urls-new (show me shorURL, longURL, edit and delete)
 - 3. GET "/urls/new" : render to urls-new(creat TinyURL, Enter a URL)
+- 3-1. GET "/register" : render to  "urls_register"
 - 4. GET "/urls/:shortURL" : render to 'urls_show' (TinyURL for: longURL, short URL: shortURL, New URL: submit)
 - 4-1. POST "/login" : set cookie name "username" to the value submit with form on browser and redirect to "/urls"
 - 4-2. POST '/logout' : delete username and redirect to '/urls'
