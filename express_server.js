@@ -50,13 +50,33 @@ app.get("/urls/new", (req, res) => {
   res.render('urls_new');
 });
 
-//3.1 register
+//3.1 GET Register
 app.get("/register", (req, res) => {
   const templateVars = {
     username: req.cookies["username"],
     urls: urlDatabase
   };
   res.render("urls_register", templateVars)
+});
+//3.2 POST Register
+app.post("/register", (req, res) => {
+  const id = generateRandomString();
+  console.log("POST REG id", id);
+  console.log("POST REG req.body", req.body); //{ email: 'amerimahsa@yahoo.com', password: '12' }
+  console.log("POST REG req.body.email)", req.body.email);
+  console.log("POST REG req.body.password)", req.body.password);
+  const email = req.body.email;
+  const password = req.body.password;
+  const user = { //add user to users
+    id, 
+    email, 
+    password
+  };
+  const key = id;
+  users[key] = user;//add user to users
+
+  res.cookie('user_id', id)
+  res.redirect("/urls");
 });
 
 //4.
