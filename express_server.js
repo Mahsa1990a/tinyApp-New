@@ -47,6 +47,10 @@ app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and
   res.render('urls_show', templateVars)
 });
 
+// app.post("/login", (req, res) => {
+//   res.cookie = 
+//   res.redirect("/urls");
+// });
 //5.
 app.post("/urls", (req, res) => { //urls/new
   //console.log(urlDatabase); I can see because it is a global
