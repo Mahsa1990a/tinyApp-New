@@ -56,6 +56,12 @@ app.post('/login', (req, res) => {
   res.redirect('/urls');
 });
 
+//4.2
+app.post('/logout', (req, res) => {
+  res.clearCookie("username", req.body.username);
+  res.redirect('/urls');
+});
+
 //5.
 app.post("/urls", (req, res) => { //urls/new
   //console.log(urlDatabase); I can see because it is a global
