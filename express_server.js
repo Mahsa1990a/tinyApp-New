@@ -55,9 +55,22 @@ app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and
   res.render('urls_show', templateVars)
 });
 
+//delete:
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL; //delet this would be enough because it's a key
   delete urlDatabase[shortURL];
+  res.redirect("/urls");
+});
+
+//edit:
+app.post("/urls/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
+  console.log("edit shortURL", shortURL);
+  const longURL = req.body.longURL;
+  console.log("edit longURL", longURL);
+
+  urlDatabase[shortURL] = longURL; //update longURL
+
   res.redirect("/urls");
 });
 
