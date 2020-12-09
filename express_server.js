@@ -64,6 +64,9 @@ app.get("/urls", (req, res) => {
   //const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
   const user = users[req.cookies.user_id] ? users[req.cookies.user_id].id : "";
   const username = user ? users[req.cookies.user_id].email : "";
+   if(!user){
+   return res.redirect('/login')
+  }
   const urlOfTheUsers = urlsForUser(user);
   const templateVars = {
     //urls: urlDatabase, updated to :
@@ -125,7 +128,7 @@ app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and
   const templateVars = {
     shortURL : req.params.shortURL , //b2xVn2
     //longURL : urlDatabase[req.params.shortURL], //http://www.lighthouselabs.ca
-    longURL : urlDatabase[req.params.shortURL].longURL,
+    longURL : urlDatabase[req.params.shortURL]["longURL"],
     //username: req.cookies["username"],
     username : user
   };
