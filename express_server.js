@@ -128,6 +128,7 @@ app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and
   if (!user) {
     return res.redirect('/login');
   }
+ 
   const templateVars = {
     shortURL : req.params.shortURL , //b2xVn2
     //longURL : urlDatabase[req.params.shortURL], //http://www.lighthouselabs.ca
@@ -136,7 +137,12 @@ app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and
     username : user,
     urls : urlsForUser(user.id)
   };
-  res.render('urls_show', templateVars)
+  if (urlDatabase[req.params.shortURL] && req.cookies.user_id === urlDatabase[req.params.shortURL].userID) {
+    res.render('urls_show', templateVars);
+  } else {
+    res.send("<h1> 🛑 It Doesn't belong you! 🛑 </h1>")
+  }
+  
 });
 
 //3.1 GET Register
