@@ -82,24 +82,40 @@ app.get("/register", (req, res) => {
   res.render("urls_register", templateVars)
 });
 
-
+//helper Func:
+const fetchEmail = (dataBase, email) => {
+  for (let key in dataBase) { //key -> id = userRandomID,user2RandomID,ed5f5p  
+    console.log("key of 88:", key);
+    console.log("dataBase[key] of 88:", dataBase[key]);//{ id: 'mb3dt1', email: 'amerimahsa@yahoo.com', password: '123' }
+    if (dataBase[key].email === email) {
+      return dataBase[key].email;
+      //return true;
+    }
+  } return false;
+};
 
 //3.2 POST Register
 app.post("/register", (req, res) => {
   const id = generateRandomString();
-  console.log("POST REG id", id);
+  //console.log("POST REG id", id);
   console.log("POST REG req.body", req.body); //{ email: 'amerimahsa@yahoo.com', password: '12' }
-  console.log("POST REG req.body.email)", req.body.email);
-  console.log("POST REG req.body.password)", req.body.password);
   const email = req.body.email;
   const password = req.body.password;
-  const newUser = { //add user to users
+
+  //conditions:
+  if (email.length === 0 || password.length === 0) {
+    return res.status(400).send("🛑 Email or Password is invalid! 🛑");
+  } else if (fetchEmail(users, email)) {
+    return res.status(400).send("🛑 Email is already in use! 🛑");
+  }
+  
+  const newUser = { //add newUser to users
     id, 
     email, 
     password
   };
   const key = id;
-  users[key] = newUser;//add user to users
+  users[key] = newUser;//add newUser to users
  
   res.cookie('user_id', id);
   res.redirect("/urls");
