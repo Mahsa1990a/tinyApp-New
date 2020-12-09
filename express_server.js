@@ -63,7 +63,7 @@ app.get("/urls", (req, res) => {
   // } I did this :
   //const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
   const user = users[req.cookies.user_id] ? users[req.cookies.user_id].id : "";
-  const username = user ? users[req.cookies.user_id].email : "";
+  const username = user ? users[req.cookies.user_id].email : ""; //login as email...
    if(!user){
    return res.redirect('/login')
   }
@@ -125,12 +125,16 @@ app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and
   //console.log("req.params", req.params); //{ shortURL: 'b2xVn2' }
   //console.log("req.params.shortURL", req.params.shortURL); //{ shortURL: 'b2xVn2' }
   const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
+  if (!user) {
+    return res.redirect('/login');
+  }
   const templateVars = {
     shortURL : req.params.shortURL , //b2xVn2
     //longURL : urlDatabase[req.params.shortURL], //http://www.lighthouselabs.ca
-    longURL : urlDatabase[req.params.shortURL]["longURL"],
+    longURL : urlDatabase[req.params.shortURL].longURL,
     //username: req.cookies["username"],
-    username : user
+    username : user,
+    urls : urlsForUser(user.id)
   };
   res.render('urls_show', templateVars)
 });
@@ -229,8 +233,15 @@ app.post('/logout', (req, res) => {
 //6. delete:
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL; //delet this would be enough because it's a key
-  delete urlDatabase[shortURL];
-  res.redirect("/urls");
+  //delete urlDatabase[shortURL];
+  const userId = req.cookies.user_id;
+  if (urlDatabase[shortURL] && userId === urlDatabase[shortURL].userID) {
+    delete urlDatabase[shortURL];
+    res.redirect("/urls");
+  } else {
+    res.send("<h1> 🛑 You can not DELETE urls not belongs you! 🛑 </h1>");
+  }
+  //res.redirect("/urls");
 });
 
 //7. edit:
@@ -238,15 +249,22 @@ app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   //console.log("edit shortURL", shortURL);
   const longURL = req.body.longURL;
-  const userID = req.cookies.user_id;
+  const userId = req.cookies.user_id;
   //console.log("edit longURL", longURL);
   //console.log("edit urlDatabase[shortURL]", urlDatabase[shortURL]);
   //urlDatabase[shortURL] = longURL; //update longURL
-  urlDatabase[shortURL] = {
-    longURL,
-    userID
+  
+  if (urlDatabase[shortURL] && userId === urlDatabase[shortURL].userID) {
+
+    urlDatabase[shortURL] = {
+      longURL : longURL,
+      userID : userId
+    }
+    res.redirect("/urls");
+  } else {
+    res.send("<h1> 🛑 You can not EDIT urls not belongs you! 🛑 </h1>");
   }
-  res.redirect("/urls");
+  //res.redirect("/urls");
 });
 
 //8. GET /u/:shortURL
