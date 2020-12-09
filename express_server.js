@@ -74,6 +74,10 @@ app.get("/urls/new", (req, res) => {
     //username: req.cookies["username"],
     username : user
   };
+  if (!user) {
+    return res.redirect("/login");
+    // or : return res.render('urls_login', templateVars)
+  }
   res.render('urls_new', templateVars);
 });
 
