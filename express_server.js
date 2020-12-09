@@ -3,7 +3,7 @@ const app = express();
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 const PORT = 8080;
 app.set("view engine", "ejs");
@@ -29,23 +29,29 @@ const users = {
   }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
-// 1.
+// 1. GET /
 app.get("/", (req, res) => {
   res.send("Hello");
 }); 
 
-//2.
+//2. GET urls
 app.get("/urls", (req, res) => {
-  console.log('from get urls', req.cookies["username"]);
+  //console.log('from get urls', req.cookies["username"]);
 
-  console.log('This is req.cookies ', req.cookies);
-  console.log('This is req.cookies.user_id ', req.cookies.user_id); //it's user_id
+  //console.log('This is req.cookies ', req.cookies);
+  //console.log('This is req.cookies.user_id ', req.cookies.user_id); //it's user_id
   //console.log('This is users[req.cookies.user_id] ', users[req.cookies.user_id]);
-  //const user = users[req.cookies.user_id];
+
+  // const user = users[req.cookies.user_id];
+  // if (user) {
+  //   console.log(users[req.cookies.user_id].email);
+  // } else {
+  //   console.log("");
+  // } I did this :
   const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
   const templateVars = {
     urls: urlDatabase, 
-    //username: req.cookies["username"],
+    //username: req.cookies["username"], updated :
     username : user
   };
   res.render('urls_index', templateVars);
@@ -60,7 +66,7 @@ app.get("/urls", (req, res) => {
 //   res.render('urls_index', templateVars);
 // });
 
-//3.
+//3. GET /urls/new
 app.get("/urls/new", (req, res) => {
   const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
   const templateVars = {
@@ -82,11 +88,11 @@ app.get("/register", (req, res) => {
   res.render("urls_register", templateVars)
 });
 
-//helper Func:
+//helper Func: for POST Register
 const fetchEmail = (dataBase, email) => {
   for (let key in dataBase) { //key -> id = userRandomID,user2RandomID,ed5f5p  
-    console.log("key of 88:", key);
-    console.log("dataBase[key] of 88:", dataBase[key]);//{ id: 'mb3dt1', email: 'amerimahsa@yahoo.com', password: '123' }
+    //console.log("key of 88:", key);
+    //console.log("dataBase[key] of 88:", dataBase[key]);//{ id: 'mb3dt1', email: 'amerimahsa@yahoo.com', password: '123' }
     if (dataBase[key].email === email) {
       return dataBase[key].email;
       //return true;
@@ -97,8 +103,7 @@ const fetchEmail = (dataBase, email) => {
 //3.2 POST Register
 app.post("/register", (req, res) => {
   const id = generateRandomString();
-  //console.log("POST REG id", id);
-  console.log("POST REG req.body", req.body); //{ email: 'amerimahsa@yahoo.com', password: '12' }
+  //console.log("POST REG req.body", req.body); //{ email: 'amerimahsa@yahoo.com', password: '12' }
   const email = req.body.email;
   const password = req.body.password;
 
@@ -108,7 +113,7 @@ app.post("/register", (req, res) => {
   } else if (fetchEmail(users, email)) {
     return res.status(400).send("🛑 Email is already in use! 🛑");
   }
-  
+  //we only want to define a new user if none of the error conditions happen so we put conditions before newUser
   const newUser = { //add newUser to users
     id, 
     email, 
@@ -121,7 +126,7 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
-//4.
+//4. GET /urls/:shortURL
 app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and available in req.param
   //console.log("req.params", req.params); //{ shortURL: 'b2xVn2' }
   //console.log("req.params.shortURL", req.params.shortURL); //{ shortURL: 'b2xVn2' }
@@ -135,30 +140,41 @@ app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and
   res.render('urls_show', templateVars)
 });
 
-//4.1
+//4.1 GET Login
+app.get('/login', (req, res) => {
+  const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
+  const templateVars = {
+    urls: urlDatabase, 
+    //username: req.cookies["username"],
+    username : user
+  };
+  res.render("urls_login", templateVars)
+});
+
+//4.2 POST Login
 app.post('/login', (req, res) => {
   //console.log("login req.body.username", req.body.username);
 
   res.cookie("user", req.cookies.user_id);
   //res.cookie("user", req.body.user);
 
-  //res.cookie('user_id', user_id)
-  //res.cookie('username', req.body.username);
+  //res.cookie('user_id', user.id)
+  //1)res.cookie('username', req.body.username); //req.cookies["username"]
   //console.log('from post login', req.cookies["username"]); //doesnt show because async
   res.redirect('/urls');
 });
 
-//4.2 delete username
+//4.3 POST LogOut ---> delete username
 app.post('/logout', (req, res) => {
   //res.clearCookie("user", req.cookies.user_id);
   const username = req.body.user_id
   res.clearCookie("user_id");
-  //res.clearCookie("username", req.body.username);
-  // or res.clearCookie("username") only the key
+  //1)res.clearCookie("username", req.body.username);
+  // 1)or res.clearCookie("username") only the key
   res.redirect('/urls');
 });
 
-//5.
+//5. POST urls
 app.post("/urls", (req, res) => { //urls/new
   //console.log(urlDatabase); I can see because it is a global
   //console.log("req.body", req.body); //{ longURL: 'www.facebook.com' }
@@ -190,23 +206,23 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect("/urls");
 });
 
-//8.
+//8. GET /u/:shortURL
 app.get("/u/:shortURL", (req, res) => { //ex: http://localhost:8080/u/b2xVn2 redirect it to : http://www.lighthouselabs.ca
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
 
-//9.
+//9. GET /urls.json
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-//10.
+//10. GET /hello
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World!</b></body></html>\n")
 });
 
-//11.
+//11. APP.LISTEN
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
