@@ -10,13 +10,15 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         <div class="row float-right" style="position:absolute; right: 0; margin: 0 1em;">
           <% if(username){ %>
-            <%= `Logged in as TinyApp User! ${username}` %>
+            <%= `Logged in as TinyApp User! ` %>
+            <br>
+            <%= `${username}` %>
             <form method="POST" action="/logout">
               <button type="submit"class="btn btn-dark btn btn-outline-danger">Logout</button>
             </form>
           <% } else { %>
             <form method="POST" action="/login">
-              <input type="text" name="username" placeholder="User Name"/>
+              <input type="text" name="username" placeholder="Username"/>
               <button type="submit"class="btn btn-dark btn btn-outline-danger">Login</button>
             </form>
           <% } %>
