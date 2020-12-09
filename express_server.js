@@ -66,7 +66,7 @@ app.get("/urls", (req, res) => {
 //   res.render('urls_index', templateVars);
 // });
 
-//3. GET /urls/new
+//3. GET /urls/new ... POST: POST urls
 app.get("/urls/new", (req, res) => {
   const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
   const templateVars = {
@@ -75,6 +75,33 @@ app.get("/urls/new", (req, res) => {
     username : user
   };
   res.render('urls_new', templateVars);
+});
+
+//3. POST urls
+app.post("/urls", (req, res) => { //urls/new
+  //console.log(urlDatabase); I can see because it is a global
+  //console.log("req.body", req.body); //{ longURL: 'www.facebook.com' }
+  let shortURL = generateRandomString();
+  let longURL = req.body.longURL;
+  console.log("longURL", longURL);
+  console.log("shortURL", shortURL);
+  urlDatabase[shortURL] = longURL; //creating longURL through shortURL(like push)
+ 
+  res.redirect(`/urls/${shortURL}`);
+});
+
+//4. GET /urls/:shortURL
+app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and available in req.param
+  //console.log("req.params", req.params); //{ shortURL: 'b2xVn2' }
+  //console.log("req.params.shortURL", req.params.shortURL); //{ shortURL: 'b2xVn2' }
+  const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
+  const templateVars = {
+    shortURL : req.params.shortURL , //b2xVn2
+    longURL : urlDatabase[req.params.shortURL], //http://www.lighthouselabs.ca
+    //username: req.cookies["username"],
+    username : user
+  };
+  res.render('urls_show', templateVars)
 });
 
 //3.1 GET Register
@@ -94,7 +121,8 @@ const fetchEmail = (dataBase, email) => {
     //console.log("key of 88:", key);
     //console.log("dataBase[key] of 88:", dataBase[key]);//{ id: 'mb3dt1', email: 'amerimahsa@yahoo.com', password: '123' }
     if (dataBase[key].email === email) {
-      return dataBase[key].email;
+      //return dataBase[key].email;
+      return dataBase[key];
       //return true;
     }
   } return false;
@@ -109,9 +137,9 @@ app.post("/register", (req, res) => {
 
   //conditions:
   if (email.length === 0 || password.length === 0) {
-    return res.status(400).send("🛑 Email or Password is invalid! 🛑");
+    return res.status(400).send("<h1> 🛑 Email or Password is invalid! 🛑 </h1>");
   } else if (fetchEmail(users, email)) {
-    return res.status(400).send("🛑 Email is already in use! 🛑");
+    return res.status(400).send("<h1> 🛑 Email is already in use! 🛑 </h1>");
   }
   //we only want to define a new user if none of the error conditions happen so we put conditions before newUser
   const newUser = { //add newUser to users
@@ -126,19 +154,6 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
-//4. GET /urls/:shortURL
-app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and available in req.param
-  //console.log("req.params", req.params); //{ shortURL: 'b2xVn2' }
-  //console.log("req.params.shortURL", req.params.shortURL); //{ shortURL: 'b2xVn2' }
-  const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
-  const templateVars = {
-    shortURL : req.params.shortURL , //b2xVn2
-    longURL : urlDatabase[req.params.shortURL], //http://www.lighthouselabs.ca
-    //username: req.cookies["username"],
-    username : user
-  };
-  res.render('urls_show', templateVars)
-});
 
 //4.1 GET Login
 app.get('/login', (req, res) => {
@@ -154,38 +169,31 @@ app.get('/login', (req, res) => {
 //4.2 POST Login
 app.post('/login', (req, res) => {
   //console.log("login req.body.username", req.body.username);
-
-  res.cookie("user", req.cookies.user_id);
-  //res.cookie("user", req.body.user);
-
-  //res.cookie('user_id', user.id)
   //1)res.cookie('username', req.body.username); //req.cookies["username"]
-  //console.log('from post login', req.cookies["username"]); //doesnt show because async
+  const email = req.body.email;
+  const password = req.body.password;
+  const user = fetchEmail(users, email);
+  if (email.length === 0 || password.length === 0) {
+    return res.status(403).send("<h1> 🛑 Email or Password is invalid! 🛑 </h1>");
+  } else if (!user || user.password !== password) {
+    return res.status(403).send("<h1> 🛑 User or Password is NOT MATCH!!! 🛑 First Register </h1>"); 
+  }
+  res.cookie('user_id', user.id); //else : user exist and password matchs
   res.redirect('/urls');
+    //res.cookie("user", req.cookies.user_id);
+  //res.cookie("user", req.body.user);
+  //console.log('from post login', req.cookies["username"]); //doesnt show because async
 });
 
 //4.3 POST LogOut ---> delete username
 app.post('/logout', (req, res) => {
-  //res.clearCookie("user", req.cookies.user_id);
-  const username = req.body.user_id
+  //1)res.clearCookie("username", req.body.username); or res.clearCookie("username") only the key
+
+  const username = req.body.user_id;
   res.clearCookie("user_id");
-  //1)res.clearCookie("username", req.body.username);
-  // 1)or res.clearCookie("username") only the key
   res.redirect('/urls');
 });
 
-//5. POST urls
-app.post("/urls", (req, res) => { //urls/new
-  //console.log(urlDatabase); I can see because it is a global
-  //console.log("req.body", req.body); //{ longURL: 'www.facebook.com' }
-  let shortURL = generateRandomString();
-  let longURL = req.body.longURL;
-  console.log("longURL", longURL);
-  console.log("shortURL", shortURL);
-  urlDatabase[shortURL] = longURL; //creating longURL through shortURL(like push)
- 
-  res.redirect(`/urls/${shortURL}`);
-});
 
 //6. delete:
 app.post("/urls/:shortURL/delete", (req, res) => {
