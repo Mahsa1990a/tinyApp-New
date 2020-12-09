@@ -36,6 +36,17 @@ app.get("/", (req, res) => {
   res.send("Hello");
 }); 
 
+//helper Function
+const urlsForUser = (id) => {
+  let urlsOfUsers = {};
+  for (let key in urlDatabase) {
+    if (urlDatabase[key].userID === id) {
+      urlsOfUsers[key] = urlDatabase[key];
+    }
+  }
+  return urlsOfUsers;
+};
+
 //2. GET urls
 app.get("/urls", (req, res) => {
   //console.log('from get urls', req.cookies["username"]);
@@ -50,11 +61,16 @@ app.get("/urls", (req, res) => {
   // } else {
   //   console.log("");
   // } I did this :
-  const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
+  //const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
+  const user = users[req.cookies.user_id] ? users[req.cookies.user_id].id : "";
+  const username = user ? users[req.cookies.user_id].email : "";
+  const urlOfTheUsers = urlsForUser(user);
   const templateVars = {
-    urls: urlDatabase, 
+    //urls: urlDatabase, updated to :
+    urls: urlOfTheUsers,
     //username: req.cookies["username"], updated :
-    username : user
+    //username : user updated :
+    username
   };
   res.render('urls_index', templateVars);
 });
@@ -89,10 +105,15 @@ app.post("/urls", (req, res) => { //urls/new
   //console.log("req.body", req.body); //{ longURL: 'www.facebook.com' }
   let shortURL = generateRandomString();
   let longURL = req.body.longURL;
-  console.log("longURL", longURL);
-  console.log("shortURL", shortURL);
-  urlDatabase[shortURL] = longURL; //creating longURL through shortURL(like push)
- 
+  console.log("line 92 longURL:", longURL)
+  let userID = req.cookies.user_id
+  console.log("line 94 userID:", userID)
+  
+  //urlDatabase[shortURL] = longURL; //creating longURL through shortURL(like push)
+  urlDatabase[shortURL] = {
+    longURL,
+    userID
+  }
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -103,7 +124,8 @@ app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and
   const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
   const templateVars = {
     shortURL : req.params.shortURL , //b2xVn2
-    longURL : urlDatabase[req.params.shortURL], //http://www.lighthouselabs.ca
+    //longURL : urlDatabase[req.params.shortURL], //http://www.lighthouselabs.ca
+    longURL : urlDatabase[req.params.shortURL].longURL,
     //username: req.cookies["username"],
     username : user
   };
@@ -211,18 +233,24 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 //7. edit:
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  console.log("edit shortURL", shortURL);
+  //console.log("edit shortURL", shortURL);
   const longURL = req.body.longURL;
-  console.log("edit longURL", longURL);
-  console.log("edit urlDatabase[shortURL]", urlDatabase[shortURL]);
-  urlDatabase[shortURL] = longURL; //update longURL
-
+  const userID = req.cookies.user_id;
+  //console.log("edit longURL", longURL);
+  //console.log("edit urlDatabase[shortURL]", urlDatabase[shortURL]);
+  //urlDatabase[shortURL] = longURL; //update longURL
+  urlDatabase[shortURL] = {
+    longURL,
+    userID
+  }
   res.redirect("/urls");
 });
 
 //8. GET /u/:shortURL
 app.get("/u/:shortURL", (req, res) => { //ex: http://localhost:8080/u/b2xVn2 redirect it to : http://www.lighthouselabs.ca
-  const longURL = urlDatabase[req.params.shortURL];
+  //const longURL = urlDatabase[req.params.shortURL];
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL].longURL; //["longURL"]
   res.redirect(longURL);
 });
 
