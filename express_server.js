@@ -2,6 +2,9 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
+const salt = bcrypt.genSaltSync(10);
+
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
@@ -49,11 +52,10 @@ const urlsForUser = (id) => {
 
 //2. GET urls
 app.get("/urls", (req, res) => {
-  //console.log('from get urls', req.cookies["username"]);
+  //console.log('from get urls 55:', req.cookies["username"]);
 
-  //console.log('This is req.cookies ', req.cookies);
-  //console.log('This is req.cookies.user_id ', req.cookies.user_id); //it's user_id
-  //console.log('This is users[req.cookies.user_id] ', users[req.cookies.user_id]);
+  //console.log('This is req.cookies 57:', req.cookies);//{ user_id: 'srvu8g' }
+  //console.log('This is req.cookies.user_id 58:', req.cookies.user_id); //it's user_id
 
   // const user = users[req.cookies.user_id];
   // if (user) {
@@ -63,7 +65,9 @@ app.get("/urls", (req, res) => {
   // } I did this :
   //const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
   const user = users[req.cookies.user_id] ? users[req.cookies.user_id].id : "";
+  //console.log("user69: ", user) //srvu8g
   const username = user ? users[req.cookies.user_id].email : ""; //login as email...
+  //console.log("username 71:", username) //  amerimahsa@yahoo.com emaili k bahash register kardam
    if(!user){
    return res.redirect('/login')
   }
@@ -72,24 +76,16 @@ app.get("/urls", (req, res) => {
     //urls: urlDatabase, updated to :
     urls: urlOfTheUsers,
     //username: req.cookies["username"], updated :
-    //username : user updated :
+    //username : user, updated :
     username
   };
   res.render('urls_index', templateVars);
 });
 
-// app.get('/urls', (req, res) => {
-//   const userID = req.cookies['user_id'];
-//   const templateVars = {
-//     urls: urlDatabase,
-//     user: users[userID]
-//   };
-//   res.render('urls_index', templateVars);
-// });
-
 //3. GET /urls/new ... POST: POST urls
 app.get("/urls/new", (req, res) => {
   const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
+  //console.log("user89: ", user); //amerimahsa@yahoo.com: emaili k bahash register kardamo mide
   const templateVars = {
     urls: urlDatabase,
     //username: req.cookies["username"],
@@ -108,9 +104,9 @@ app.post("/urls", (req, res) => { //urls/new
   //console.log("req.body", req.body); //{ longURL: 'www.facebook.com' }
   let shortURL = generateRandomString();
   let longURL = req.body.longURL;
-  console.log("line 92 longURL:", longURL)
+  //console.log("line 92 longURL:", longURL)
   let userID = req.cookies.user_id
-  console.log("line 94 userID:", userID)
+  //console.log("line 94 userID:", userID)
   
   //urlDatabase[shortURL] = longURL; //creating longURL through shortURL(like push)
   urlDatabase[shortURL] = {
@@ -140,7 +136,7 @@ app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and
   if (urlDatabase[req.params.shortURL] && req.cookies.user_id === urlDatabase[req.params.shortURL].userID) {
     res.render('urls_show', templateVars);
   } else {
-    res.send("<h1> 🛑 It Doesn't belong you! 🛑 </h1>")
+    res.status(400).send("<h1> 🛑 It Doesn't belong you! 🛑 </h1>")
   }
   
 });
@@ -158,12 +154,12 @@ app.get("/register", (req, res) => {
 
 //helper Func: for POST Register
 const fetchEmail = (dataBase, email) => {
-  for (let key in dataBase) { //key -> id = userRandomID,user2RandomID,ed5f5p  
+  for (let key in dataBase) { //key -> id = userRandomID,user2RandomID,ed5f5p(vase newUser)  
     //console.log("key of 88:", key);
     //console.log("dataBase[key] of 88:", dataBase[key]);//{ id: 'mb3dt1', email: 'amerimahsa@yahoo.com', password: '123' }
     if (dataBase[key].email === email) {
       //return dataBase[key].email;
-      return dataBase[key];
+      return dataBase[key]; //{id: ..., email: ..., pass: ...}
       //return true;
     }
   } return false;
@@ -179,14 +175,14 @@ app.post("/register", (req, res) => {
   //conditions:
   if (email.length === 0 || password.length === 0) {
     return res.status(400).send("<h1> 🛑 Email or Password is invalid! 🛑 </h1>");
-  } else if (fetchEmail(users, email)) {
+  } else if (fetchEmail(users, email)) { //yani in email faghat vase ye nafare, kasi nemitoone bahash vared she
     return res.status(400).send("<h1> 🛑 Email is already in use! 🛑 </h1>");
   }
   //we only want to define a new user if none of the error conditions happen so we put conditions before newUser
   const newUser = { //add newUser to users
     id, 
     email, 
-    password
+    password: bcrypt.hashSync(password, salt) //const hashedPassword = bcrypt.hashSync(password, 10);
   };
   const key = id;
   users[key] = newUser;//add newUser to users
@@ -216,14 +212,13 @@ app.post('/login', (req, res) => {
   const user = fetchEmail(users, email);
   if (email.length === 0 || password.length === 0) {
     return res.status(403).send("<h1> 🛑 Email or Password is invalid! 🛑 </h1>");
-  } else if (!user || user.password !== password) {
+    //else if (!user || user.password !== password)
+  } else if (!user || !bcrypt.compareSync(password, user.password)) { // hashing first one and compare it to the second
+    //                                                                 bcrypt.compareSync("B4c0/\/", hash)  
     return res.status(403).send("<h1> 🛑 User or Password is NOT MATCH!!! 🛑 First Register </h1>"); 
   }
   res.cookie('user_id', user.id); //else : user exist and password matchs
   res.redirect('/urls');
-    //res.cookie("user", req.cookies.user_id);
-  //res.cookie("user", req.body.user);
-  //console.log('from post login', req.cookies["username"]); //doesnt show because async
 });
 
 //4.3 POST LogOut ---> delete username
@@ -235,8 +230,7 @@ app.post('/logout', (req, res) => {
   res.redirect('/urls');
 });
 
-
-//6. delete:
+//6. Delete:
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL; //delet this would be enough because it's a key
   //delete urlDatabase[shortURL];
@@ -245,19 +239,17 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     delete urlDatabase[shortURL];
     res.redirect("/urls");
   } else {
-    res.send("<h1> 🛑 You can not DELETE urls not belongs you! 🛑 </h1>");
+    res.status(403).send("<h1> 🛑 You must be logged in to DELETE URLs! 🛑 </h1>");
   }
   //res.redirect("/urls");
 });
 
-//7. edit:
+//7. Edit / update:
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   //console.log("edit shortURL", shortURL);
   const longURL = req.body.longURL;
   const userId = req.cookies.user_id;
-  //console.log("edit longURL", longURL);
-  //console.log("edit urlDatabase[shortURL]", urlDatabase[shortURL]);
   //urlDatabase[shortURL] = longURL; //update longURL
   
   if (urlDatabase[shortURL] && userId === urlDatabase[shortURL].userID) {
@@ -268,7 +260,7 @@ app.post("/urls/:shortURL", (req, res) => {
     }
     res.redirect("/urls");
   } else {
-    res.send("<h1> 🛑 You can not EDIT urls not belongs you! 🛑 </h1>");
+    res.status(403).send("<h1> 🛑 You must be logged in to EDIT URLs! 🛑 </h1>");
   }
   //res.redirect("/urls");
 });
@@ -277,7 +269,7 @@ app.post("/urls/:shortURL", (req, res) => {
 app.get("/u/:shortURL", (req, res) => { //ex: http://localhost:8080/u/b2xVn2 redirect it to : http://www.lighthouselabs.ca
   //const longURL = urlDatabase[req.params.shortURL];
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL].longURL; //["longURL"]
+  const longURL = urlDatabase[shortURL].longURL; //or["longURL"]
   res.redirect(longURL);
 });
 
