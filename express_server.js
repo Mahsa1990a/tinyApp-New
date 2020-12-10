@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 const salt = bcrypt.genSaltSync(10);
+//const { generateRandomString, urlsForUser, fetchEmail, urlDatabase, users } = require("./helpers")
 
 
 app.use(bodyParser.urlencoded({extended: false}));
@@ -273,9 +274,10 @@ app.get("/u/:shortURL", (req, res) => { //ex: http://localhost:8080/u/b2xVn2 red
   res.redirect(longURL);
 });
 
-//9. GET /urls.json
+//9. GET /urls.json     //for showing obj in browser
 app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
+  //res.json(urlDatabase);
+  res.json(users);
 });
 
 //10. GET /hello
