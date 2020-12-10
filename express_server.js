@@ -1,11 +1,15 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
+//const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session')
 const bcrypt = require('bcrypt');
 const salt = bcrypt.genSaltSync(10);
 //const { generateRandomString, urlsForUser, fetchEmail, urlDatabase, users } = require("./helpers")
-
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1', 'key2']
+}))
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
