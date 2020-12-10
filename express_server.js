@@ -12,7 +12,7 @@ app.use(cookieSession({
 }))
 
 app.use(bodyParser.urlencoded({extended: false}));
-app.use(cookieParser());
+//app.use(cookieParser());
 const PORT = 8080;
 app.set("view engine", "ejs");
 
@@ -69,10 +69,12 @@ app.get("/urls", (req, res) => {
   //   console.log("");
   // } I did this :
   //const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
-  const user = users[req.cookies.user_id] ? users[req.cookies.user_id].id : "";
+  //const user = users[req.cookies.user_id] ? users[req.cookies.user_id].id : "";
   //console.log("user69: ", user) //srvu8g
-  const username = user ? users[req.cookies.user_id].email : ""; //login as email...
+  const user = users[req.session.user_id] ? users[req.session.user_id].id : "";
+  //const username = user ? users[req.cookies.user_id].email : ""; //login as email...
   //console.log("username 71:", username) //  amerimahsa@yahoo.com emaili k bahash register kardam
+  const username = user ? users[req.session.user_id].email : "";
    if(!user){
    return res.redirect('/login')
   }
@@ -89,8 +91,9 @@ app.get("/urls", (req, res) => {
 
 //3. GET /urls/new ... POST: POST urls
 app.get("/urls/new", (req, res) => {
-  const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
+  //const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
   //console.log("user89: ", user); //amerimahsa@yahoo.com: emaili k bahash register kardamo mide
+  const user = users[req.session.user_id] ? users[req.session.user_id].email : "";
   const templateVars = {
     urls: urlDatabase,
     //username: req.cookies["username"],
@@ -110,7 +113,8 @@ app.post("/urls", (req, res) => { //urls/new
   let shortURL = generateRandomString();
   let longURL = req.body.longURL;
   //console.log("line 92 longURL:", longURL)
-  let userID = req.cookies.user_id
+  //let userID = req.cookies.user_id
+  let userID = req.session.user_id
   //console.log("line 94 userID:", userID)
   
   //urlDatabase[shortURL] = longURL; //creating longURL through shortURL(like push)
@@ -125,7 +129,8 @@ app.post("/urls", (req, res) => { //urls/new
 app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and available in req.param
   //console.log("req.params", req.params); //{ shortURL: 'b2xVn2' }
   //console.log("req.params.shortURL", req.params.shortURL); //{ shortURL: 'b2xVn2' }
-  const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
+  //const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
+  const user = users[req.session.user_id] ? users[req.session.user_id].email : "";
   if (!user) {
     return res.redirect('/login');
   }
@@ -138,7 +143,7 @@ app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and
     username : user,
     urls : urlsForUser(user.id)
   };
-  if (urlDatabase[req.params.shortURL] && req.cookies.user_id === urlDatabase[req.params.shortURL].userID) {
+  if (urlDatabase[req.params.shortURL] && req.session.user_id === urlDatabase[req.params.shortURL].userID) {
     res.render('urls_show', templateVars);
   } else {
     res.status(400).send("<h1> 🛑 It Doesn't belong you! 🛑 </h1>")
@@ -148,7 +153,8 @@ app.get("/urls/:shortURL", (req, res) => { //:id means id is route parameter and
 
 //3.1 GET Register
 app.get("/register", (req, res) => {
-  const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
+  //const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
+  const user = users[req.session.user_id] ? users[req.session.user_id].email : "";
   const templateVars = {
     urls: urlDatabase, 
     //username: req.cookies["username"],
@@ -192,14 +198,16 @@ app.post("/register", (req, res) => {
   const key = id;
   users[key] = newUser;//add newUser to users
  
-  res.cookie('user_id', id);
+  //res.cookie('user_id', id); its func
+  req.session.user_id = id; //obj
   res.redirect("/urls");
 });
 
 
 //4.1 GET Login
 app.get('/login', (req, res) => {
-  const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
+  //const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
+  const user = users[req.session.user_id] ? users[req.session.user_id].email : "";
   const templateVars = {
     urls: urlDatabase, 
     //username: req.cookies["username"],
@@ -222,7 +230,8 @@ app.post('/login', (req, res) => {
     //                                                                 bcrypt.compareSync("B4c0/\/", hash)  
     return res.status(403).send("<h1> 🛑 User or Password is NOT MATCH!!! 🛑 First Register </h1>"); 
   }
-  res.cookie('user_id', user.id); //else : user exist and password matchs
+  //res.cookie('user_id', user.id); //else : user exist and password matchs
+  req.session.user_id = user.id;
   res.redirect('/urls');
 });
 
@@ -230,8 +239,9 @@ app.post('/login', (req, res) => {
 app.post('/logout', (req, res) => {
   //1)res.clearCookie("username", req.body.username); or res.clearCookie("username") only the key
 
-  const username = req.body.user_id;
-  res.clearCookie("user_id");
+  //const username = req.body.user_id;
+  //res.clearCookie("user_id");
+  req.session = null;
   res.redirect('/urls');
 });
 
@@ -239,7 +249,8 @@ app.post('/logout', (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL; //delet this would be enough because it's a key
   //delete urlDatabase[shortURL];
-  const userId = req.cookies.user_id;
+  //const userId = req.cookies.user_id;
+  const userId = req.session.user_id;
   if (urlDatabase[shortURL] && userId === urlDatabase[shortURL].userID) {
     delete urlDatabase[shortURL];
     res.redirect("/urls");
@@ -254,7 +265,8 @@ app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   //console.log("edit shortURL", shortURL);
   const longURL = req.body.longURL;
-  const userId = req.cookies.user_id;
+  //const userId = req.cookies.user_id;
+  const userId = req.session.user_id;
   //urlDatabase[shortURL] = longURL; //update longURL
   
   if (urlDatabase[shortURL] && userId === urlDatabase[shortURL].userID) {
