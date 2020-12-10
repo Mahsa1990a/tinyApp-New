@@ -10,9 +10,9 @@
         <a class="nav-item nav-link" href="/urls/new"><b>Create New URL</b></a>
         <div class="row float-right" style="position:absolute; right: 0; margin: 0 1em;">
           <% if(username){ %>
-            <h5 class="navbar-brand"style="color: black;"><%= `Logged in as :` %></h5>
+            <p class="navbar-brand" style="color: black; font-size: medium;"><%= `Logged in as :` %></p>
             <br>
-            <p class="navbar-brand" style="color: black;"><b><%= `${username}` %></b></p>
+            <p class="navbar-brand" style="color: black; font-size: medium;"><b><%= `${username}` %></b></p>
             <form method="POST" action="/logout">
               <button type="submit"class="btn btn-dark btn btn-outline-danger">Logout</button>
             </form>
